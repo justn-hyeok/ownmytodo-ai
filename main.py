@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 import os
 
 from prompts import REWRITE_PROMPT
+from datetime import datetime
 
 # 환경 변수 로드
 load_dotenv()
@@ -25,7 +26,8 @@ limiter = Limiter(key_func=get_remote_address)
 # Pydantic 모델
 class RewriteRequest(BaseModel):
     title: str
-    context: str | None = None
+    today_todos: str | None = None
+    user_context: str | None = None
 
 
 class RewriteResponse(BaseModel):
@@ -68,8 +70,16 @@ async def rewrite_todo(request: Request, body: RewriteRequest):
         )
 
     # 프롬프트 생성
-    context = body.context if body.context else "없음"
-    prompt = REWRITE_PROMPT.format(title=body.title, context=context)
+    today_todos = body.today_todos if body.today_todos else "없음"
+    user_context = body.user_context if body.user_context else "없음"
+    current_time = datetime.now().strftime("%H:%M")
+
+    prompt = REWRITE_PROMPT.format(
+        title=body.title,
+        today_todos=today_todos,
+        current_time=current_time,
+        user_context=user_context,
+    )
 
     try:
         # Gemini API 비동기 호출
