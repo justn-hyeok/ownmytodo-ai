@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  fastapi:
+    build: .
+    container_name: wnsgur-server
+    ports:
+      - "8000:8000"
+    environment:
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+    restart: unless-stopped
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
